@@ -15,9 +15,21 @@ const PIPE_RANGE : int = 200
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
-	screen_size = get_window().size
+	# Game coordinates, which differ from the window size when the game is scaled to the screen.
+	screen_size = get_viewport().get_visible_rect().size
 	ground_height = $Ground.get_node("Sprite2D").texture.get_height()
+	fit_to_screen()
 	new_game()
+
+# The game is designed for a fixed height; on taller screens the stretch aspect "expand" adds space,
+# so the background and ground move down to stay at the bottom and the sky color fills the top.
+func fit_to_screen():
+	var extra : float = screen_size.y - ProjectSettings.get_setting("display/window/size/viewport_height")
+	if extra > 0:
+		$Background.position.y += extra
+		$Ground.position.y += extra
+	var sky: Color = $Background.texture.get_image().get_pixel(0, 0)
+	RenderingServer.set_default_clear_color(sky)
 
 func new_game():
 	#reset variables
